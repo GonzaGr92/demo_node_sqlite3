@@ -7,6 +7,9 @@ const _ = require('lodash');
 const QUERY_ALL = 'ALL';
 const QUERY_GET = 'GET';
 
+// Project self dependencies
+var Artist = require('./models/Artist');
+
 // Connect to sqlite db
 let db = new sqlite3.Database('./db/chinook.db', (err) => {
     if (err) {
@@ -48,17 +51,17 @@ app.get('/artists', (req, res) => {
     const page = _.get(req, 'query.page', 0);
     const limit = 20;
 
-    let sql = `SELECT * FROM artists 
-    LIMIT ${limit}
-    OFFSET ${limit * page}`;
-
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            res.status(500);
-            return res.send('Internal server error');
-        }
-
-        res.json(rows);
+    Artist.findAll({
+        where: {
+            ArtistId: 2
+        },
+        limit: limit,
+        offset: limit * page,
+    }).then((artists) => {
+        res.json('index', ...artists);
+    }).catch((err) => {
+        res.status(500);
+        return res.send('Internal server error');
     });
 });
 
